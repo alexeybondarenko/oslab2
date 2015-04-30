@@ -1,4 +1,5 @@
 require "pry"
+require "./process_wrapper"
 
 class OS
   def initialize
@@ -10,8 +11,16 @@ class OS
     cpu_total_new = cpu_total
     processes_new = processes
 
-    # utime - 14'th word in process string
-    binding.pry
+    cpu_total_diff = cpu_total_new - cpu_total_old
+
+    processes_old.map do |process|
+      existing_process = processes_new.find { |p| p.pid == process.pid }
+
+      if existing_process
+        process.calculate_cpu (existing_process.time - process.time), cpu_total_diff
+        process
+      end
+    end.compact
   end
 
   def cpu_total
@@ -30,9 +39,9 @@ class OS
 
   def processes
     pids.map do |pid|
-      File.open(['/proc/', pid, '/stat'].join(''), 'r').each_line.first
+      ProcessWrapper.new File.open(['/proc/', pid, '/stat'].join(''), 'r').each_line.first, File.open(['/proc/', pid, '/cmdline'].join(''), 'r').each_line.first
     end
   end
 end
 
-OS.new.processes
+OS.new
