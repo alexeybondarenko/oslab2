@@ -24,7 +24,6 @@ class OS
   end
 
   def cpu_total
-    binding.pry
     File.open('/proc/stat', 'r')
       .each_line
       .reject { |l| /cpu /.match(l).nil?  }
@@ -34,13 +33,29 @@ class OS
       .reduce(&:+)
   end
 
+  def uptime
+    @uptime ||= File.open('/proc/uptime', 'r').each_line.first.split(' ').first.to_f
+  end
+
+  def mem_total
+    @mem_total ||= /(\d+)/.match(File.open('/proc/meminfo', 'r').each_line.first)[0].to_i
+  end
+
+  def page_size
+    @statm_page_size ||= begin
+      `getconf PAGESIZE`.to_i
+    rescue
+      4
+    end
+  end
+
   def pids
     @pids ||= Dir.foreach('/proc').reject { |dirname| dirname == '.' or dirname == '..' or /^\d+/.match(dirname).nil? }
   end
 
   def processes
     pids.map do |pid|
-      ProcessWrapper.new File.open(['/proc/', pid, '/stat'].join(''), 'r').each_line.first, File.open(['/proc/', pid, '/cmdline'].join(''), 'r').each_line.first
+      ProcessWrapper.new File.open(['/proc/', pid, '/stat'].join(''), 'r').each_line.first, mem_total, page_size, uptime
     end
   end
 end
