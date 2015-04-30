@@ -24,13 +24,14 @@ class OS
   end
 
   def cpu_total
+    binding.pry
     File.open('/proc/stat', 'r')
       .each_line
       .reject { |l| /cpu /.match(l).nil?  }
       .first
       .split(" ")
       .map(&:to_i)
-      .reduce(:+)
+      .reduce(&:+)
   end
 
   def pids
