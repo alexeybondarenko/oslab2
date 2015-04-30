@@ -1,18 +1,10 @@
 require 'sinatra'
 require 'json'
 require 'pry'
+require 'virtus'
 
-class JSONable
-    def to_json
-        hash = {}
-        self.instance_variables.each do |var|
-            hash[var.to_s.delete "@"] = self.instance_variable_get var
-        end
-        hash.to_json
-    end
-end
-
-class Test < JSONable
+class Test 
+    include Virtus.model
 
 	attr_reader :id, :name
 
