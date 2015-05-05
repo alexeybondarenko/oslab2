@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>WebTOP</title>
+	<link rel="stylesheet" type="text/css" href="/css/bootstrap.css">
+	<script type="text/javascript" src="/js/jquery.js"></script>
+
+	<script type="text/javascript">
+		$(function() {
+			setInterval(function() {
+				$.get('/processes').then(function(data) {
+					var data = JSON.parse(data);
+					
+					var html = '';
+
+					data.sort(function(a,b){ return b.pid - a.pid;  }).forEach(function(item) {
+						html += '<tr>';
+
+							html += '<td>' + item.pid + '</td>';
+							html += '<td>' + item.state + '</td>';
+							html += '<td>' + item.name + '</td>';
+							html += '<td>' + item.path + '</td>';
+							html += '<td>' + item.username + '</td>';
+							html += '<td>' + item.cpu + '</td>';
+							html += '<td>' + item.mem + '</td>';
+							html += '<td>' + item.working_time + '</td>';
+
+						html += '</tr>';
+					});
+
+					$('.processes').empty().html(html);
+				});
+			}, 1000);
+		});
+	</script>
+</head>
+<body>
+
+	<table class="table table-condensed">
+		<thead>
+			<tr>
+				<th>PID</td>
+				<td>State</td>
+				<td>Name</td>
+				<td>Path</td>
+				<td>Username</td>
+				<td>CPU</td>
+				<td>Mem</td>
+				<td>Working time</td>
+			</tr>
+		</thead>
+		<tbody class="processes">
+			
+		</tbody>
+	</table>
+
+</body>
+</html>

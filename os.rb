@@ -1,4 +1,5 @@
 require "pry"
+require "json"
 require "./process_wrapper"
 
 class OS
@@ -13,7 +14,7 @@ class OS
 
     cpu_total_diff = cpu_total_new - cpu_total_old
 
-    processes_old.map do |process|
+    @calculated_processes = processes_old.map do |process|
       existing_process = processes_new.find { |p| p.pid == process.pid }
 
       if existing_process
@@ -55,9 +56,17 @@ class OS
 
   def processes
     pids.map do |pid|
-      ProcessWrapper.new File.open(['/proc/', pid, '/stat'].join(''), 'r').each_line.first, mem_total, page_size, uptime
-    end
+      begin
+        ProcessWrapper.new File.open(['/proc/', pid, '/stat'].join(''), 'r').each_line.first, mem_total, page_size, uptime
+      rescue
+        nil
+      end
+    end.compact
+  end
+
+  def to_json
+    @calculated_processes.map do |item|
+      item.to_hash
+    end.to_json  
   end
 end
-
-OS.new

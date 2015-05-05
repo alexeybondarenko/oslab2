@@ -1,5 +1,15 @@
+require 'virtus'
+
 class ProcessWrapper
-  attr_reader :pid, :state, :name, :path, :username, :cpu, :mem, :working_time
+  include Virtus.model
+  attribute :pid, String
+  attribute :state, String
+  attribute :name, String
+  attribute :path, String
+  attribute :username, String
+  attribute :cpu, String
+  attribute :mem, String
+  attribute :working_time, String
 
   STAT_ATTRIBUTES_MAPPING = {
     pid: 0,
@@ -18,7 +28,10 @@ class ProcessWrapper
 
     @pid, @name, @state, @utime, @stime, @cutime, @cstime, @starttime = parse_stat
 
-    @cmdline = File.open(['/proc/', @pid.to_i, '/cmdline'].join(''), 'r').each_line.first
+    @pid  = @pid.to_i
+    @name.gsub! /[\(\)]/, '' 
+    
+    @path = File.open(['/proc/', @pid.to_i, '/cmdline'].join(''), 'r').each_line.first
     @statm   = File.open(['/proc/', @pid.to_i, '/statm'].join(''), 'r').each_line.first
     @mem = @statm.split(' ')[1].to_f * (page_size / 1024) / mem_total * 100
     
