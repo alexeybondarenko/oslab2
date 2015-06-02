@@ -1,0 +1,13 @@
+
+body {
+	padding: 50px;
+	display: block;
+	border-radius: 4px;
+}
+thead {
+	background-image: linear-gradient(#f1f1f1, #e5e5e5);
+}
+.title {
+    margin-bottom: 20px;
+    color:  #333;
+}
